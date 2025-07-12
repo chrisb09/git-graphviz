@@ -23,6 +23,10 @@ git-graphviz uses git log, and all command line arguments are passed to it. This
 
 `git-graphviz --since="4 weeks"` 
 
+provide a path to a repository by having a `--path <path>` or `-p <path>`
+
+`git-graphviz --path ~/git/myspecialproject/ --since="4 weeks"`
+
 To convert the dot file to a pdf file use dot:
 
 `dot -Tpdf -o graph.pdf graph.dot`
