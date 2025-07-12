@@ -1,16 +1,46 @@
-#/bin/bash
+#!/bin/bash
 date=$(date);
-# Start the graph 
+# Store the parameters to a variable
+params="$@"
+# Only execute the following segment if at least one argument is provided
+if [[ "$#" -gt 0 ]]; then
+  # Check if the first argument is -h, --help, -?, or --path/-p
+  if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-?" ]]; then
+    echo "Usage: $0 [options] [--] [<path>...]"
+    echo "Options:"
+    echo "  -h, --help       Show this help message"
+    echo "  -?, --path       Show the path to the git repository"
+    exit 0
+  fi
+  if [[ "$1" == "-p" || "$1" == "--path" ]]; then
+    # Ensure there is a second argument
+    if [[ -z "$2" ]]; then
+      echo "Error: No path provided for --path option."
+      exit 1
+    fi
+    # cd to the specified path
+    if [[ -d "$2" ]]; then
+      cd "$2" || { echo "Error: Cannot change to directory $2"; exit 1; }
+    else
+      echo "Error: $2 is not a valid directory."
+      exit 1
+    fi
+    # Print the current working directory
+    # Set the parameters to the remaining arguments
+    params="${@:3}"
+  fi
+fi
+# Start the graph
 echo "digraph GIT {"
 echo "fontname=\"Helvetica\";"
-echo "label=\"$0 $@\n$PWD\n$date\";"
+echo "label=\"$0 $params\n$PWD\n$date\";"
 # Print node links
 # how to skip the '*' character?
 for branchname in `git for-each-ref --format="%(refname)" --sort=committerdate refs/heads`; do
-  cleanName=`echo $branchname | sed 's/\//_/g'`
+  cleanName=`echo $branchname | sed 's/[\/\.+-]/_/g'`
   branchLabelName=`echo $branchname | sed 's/refs\/[A-Za-z]*\///'`
   # Get the output from git log
-  log=$(git log "$branchname" --pretty="%H -> %P ;" "$@" 2> /dev/null);
+  log=$(git log "$branchname" --pretty="%H -> %P ;" "$params" 2> /dev/null);
   # If $log is non-empty...
   if [[ $log ]]; then
     # Create write out a cluster with all links in it.
@@ -38,7 +68,7 @@ done;
 
 # Write out all of the nodes with an appropriate label.
 echo \# Node list
-git log --decorate=full --all --boundary --pretty="  __HASH__%H [label=__DOUBLE_QUOTE__%d__NEW_LINE__%s__NEW_LINE__%cr__DOUBLE_QUOTE__,shape=__SHAPE__,style=__STYLE__,color=__COLOR__,fillcolor=__FILLCOLOR__]" "$@"|
+git log --decorate=full --all --boundary --pretty="  __HASH__%H [label=__DOUBLE_QUOTE__%d__NEW_LINE__%s__NEW_LINE__%cr__DOUBLE_QUOTE__,shape=__SHAPE__,style=__STYLE__,color=__COLOR__,fillcolor=__FILLCOLOR__]" "$params" |
 # Escape all escape chars
   sed 's/\\/\\\\/g' |
 # Escape all quote marks
