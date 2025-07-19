@@ -27,7 +27,7 @@ if [[ "$#" -gt 0 ]]; then
     fi
     # Print the current working directory
     # Set the parameters to the remaining arguments
-    params="${@:3}"
+    params=("${@:3}")
   fi
 fi
 # Start the graph
@@ -68,7 +68,7 @@ done;
 
 # Write out all of the nodes with an appropriate label.
 echo \# Node list
-git log --decorate=full --all --boundary --pretty="  __HASH__%H [label=__DOUBLE_QUOTE__%d__NEW_LINE__%s__NEW_LINE__%cr__DOUBLE_QUOTE__,shape=__SHAPE__,style=__STYLE__,color=__COLOR__,fillcolor=__FILLCOLOR__]" "$params" |
+git log --decorate=full --all --boundary --pretty="  __HASH__%H [label=__DOUBLE_QUOTE__%d__NEW_LINE__%s__NEW_LINE__%cr__DOUBLE_QUOTE__,shape=__SHAPE__,style=__STYLE__,color=__COLOR__,fillcolor=__FILLCOLOR__]" "${params[@]}" |
 # Escape all escape chars
   sed 's/\\/\\\\/g' |
 # Escape all quote marks
